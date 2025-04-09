@@ -64,9 +64,6 @@ ALTER TABLE dbo.Minute_Sleep ALTER COLUMN value INT
 --Are all the above alter statements successful?
 SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Minute_Sleep'
 
---why the data type of column logId in table Minute_Sleep is not changed to INT?
---The data type of column logId in table Minute_Sleep is not changed to INT because the column logId is a foreign key that references the Id column in the Sleep_Day table. The data type of the foreign key column should match the data type of the primary key column in the referenced table. In this case, the Id column in the Sleep_Day table is of type UNIQUEIDENTIFIER, so the logId column in the Minute_Sleep table should also be of type UNIQUEIDENTIFIER to maintain the referential integrity of the database.
-
 --Change the data type of all the columns in table Sleep_Day except column Id to the appropriate data type
 ALTER TABLE dbo.Sleep_Day ALTER COLUMN SleepDay DATETIME
 ALTER TABLE dbo.Sleep_Day ALTER COLUMN TotalSleepRecords INT
@@ -94,7 +91,7 @@ SELECT * FROM (
 ) AS t
 WHERE rn > 1
 
---Delete all the duplicate rows from the table Minute_Sleep using row_number() function where rn >1
+--Delete all the duplicate rows from the table Minute_Sleep using row_number() function
 WITH cte AS (
     SELECT *, ROW_NUMBER() OVER(PARTITION BY Id, date ORDER BY Id) AS rn
     FROM dbo.Minute_Sleep
@@ -105,7 +102,7 @@ DELETE FROM cte WHERE rn > 1
 SELECT Id, SleepDay, COUNT(*) as duplicates FROM dbo.Sleep_Day GROUP BY Id, SleepDay HAVING COUNT(*) > 1
   
 
---See all the duplicate rows in the table Sleep_Day using row_number() function where rn >1
+--Delete all the duplicate rows in the table Sleep_Day using row_number() function 
 SELECT * FROM (
     SELECT *, ROW_NUMBER() OVER(PARTITION BY Id, SleepDay ORDER BY Id) AS rn
     FROM dbo.Sleep_Day
@@ -113,7 +110,7 @@ SELECT * FROM (
 WHERE rn > 1
 
 
---Delete all the duplicate rows from the table Sleep_Day using row_number() function where rn >1
+--Delete all the duplicate rows from the table Sleep_Day using row_number() function
 WITH cte AS (
     SELECT *, ROW_NUMBER() OVER(PARTITION BY Id, SleepDay ORDER BY Id) AS rn
     FROM dbo.Sleep_Day
@@ -132,7 +129,7 @@ SELECT * FROM dbo.Sleep_Day WHERE Id IS NULL
 -- Check for null values in foreign key columns in all the tables
 SELECT * FROM dbo.Minute_Sleep WHERE logId IS NULL
 
--- Give me the total number of days for which the activity was recorded in the table Daily_Activity
+-- Calculate the total number of days for which the activity was recorded in the table Daily_Activity
 SELECT COUNT(DISTINCT ActivityDate) AS TotalDays FROM dbo.Daily_Activity
 
 -- Join the hourly calories , hourly steps and hourly intensities table to get the Id, total calories burnt, total steps taken and total intensity for each activity hour
